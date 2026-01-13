@@ -9,4 +9,18 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children()}
+<div class="app-wrapper">
+	{@render children()}
+</div>
+
+<style>
+	:global(body) {
+		margin: 0;
+		padding: 0;
+	}
+
+	.app-wrapper {
+		min-height: 100vh;
+		background-color: #ffffff;
+	}
+</style>
