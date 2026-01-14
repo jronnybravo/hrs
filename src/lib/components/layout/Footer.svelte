@@ -6,9 +6,9 @@
 			</div>
 			<div class="col-md-6 text-end">
 				<p class="mb-0">
-					<a href="#" class="text-decoration-none">Privacy Policy</a> |
-					<a href="#" class="text-decoration-none">Terms of Service</a> |
-					<a href="#" class="text-decoration-none">Contact</a>
+					<a href="/privacy" class="text-decoration-none">Privacy Policy</a> |
+					<a href="/terms" class="text-decoration-none">Terms of Service</a> |
+					<a href="/contact" class="text-decoration-none">Contact</a>
 				</p>
 			</div>
 		</div>

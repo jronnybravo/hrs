@@ -47,9 +47,9 @@
         }
     });
 
-    // Generate unique ID if not provided
-    const uniqueId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
-    const selectName = name || uniqueId;
+    // Generate unique ID if not provided - use $derived to make reactive
+    const uniqueId = $derived(id || `select-${Math.random().toString(36).substr(2, 9)}`);
+    const selectName = $derived(name || uniqueId);
 
     function handleChange(event: Event) {
         const target = event.target as HTMLSelectElement;

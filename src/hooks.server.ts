@@ -19,11 +19,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('sessionId');
 	const userId = event.cookies.get('userId');
 
-	if (sessionId && userId) {
-		event.locals.user = {
-			id: parseInt(userId)
-		};
-	}
+		if (sessionId && userId) {
+			event.locals.user = {
+				id: parseInt(userId)
+			};
+		}
 
 	return resolve(event);
 };

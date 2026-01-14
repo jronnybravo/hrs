@@ -1,7 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher, onDestroy } from 'svelte';
     import Textbox from './Textbox.svelte';
-    import axios from 'axios';
     
     export let value = '' as string | null | undefined;
     export let placeholder = 'Enter address in Siquijor';
@@ -76,14 +75,15 @@
             isLoading = true;
             
             // Call the API search endpoint
-            const response = await axios.get(`/api/locations/search?query=${encodeURIComponent(query)}&limit=8`);
+            const response = await fetch(`/api/locations/search?query=${encodeURIComponent(query)}&limit=8`);
+            const data = await response.json();
             
-            if (response.data && response.data.success) {
-                suggestions = response.data.data || [];
+            if (data && data.success) {
+                suggestions = data.data || [];
                 showSuggestions = suggestions.length > 0;
                 selectedIndex = -1;
             } else {
-                console.error('API search failed:', response.data?.message);
+                console.error('API search failed:', data?.message);
                 suggestions = [];
                 showSuggestions = false;
             }

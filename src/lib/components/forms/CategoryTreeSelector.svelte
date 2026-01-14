@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import type { PlaceCategory, EventCategory } from '$lib/entities/Category';
+    import type { PlaceCategory, EventCategory } from '$lib/db/entities/Category';
 
     $effect(() => {
         dispatch('change', { selectedIds });

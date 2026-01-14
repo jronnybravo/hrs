@@ -1,19 +1,23 @@
-import { json, type RequestHandler } from "@sveltejs/kit";
+import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { Like } from "typeorm";
 import type { FindManyOptions, FindOptionsOrder, FindOptionsWhere } from "typeorm"
 import { instanceToPlain } from "class-transformer";
 import qs from 'qs';
 
-import { Role } from "$lib/entities/Role";
-import { AdministratorPermission as Permission } from '$lib/entities/utils/Permission';
-import type { Administrator } from "$lib/entities/User";
+import { Role } from "$lib/db/entities/Role";
+import { Permission } from '$lib/utils/Permission';
+import { User } from "$lib/db/entities/User";
 
-import { getCurrentUserAuthorization } from "$lib/utils/Auth";
-
-export const GET: RequestHandler = async ({ url, cookies }) => {
-    const { response } = await getCurrentUserAuthorization(cookies, Permission.READ_ROLES);
-    if(response) {
-        return response as Response;
+export const GET: RequestHandler = async ({ url, cookies, locals }) => {
+    const user = await User.findOne({
+        where: { id: locals.user?.id },
+        relations: { role: true }
+    });
+    if(!user) {
+        throw error(401, 'Unauthorized');
+    }
+    if(!user.can(Permission.READ_ROLES)) {
+        throw error(403, 'Forbidden');
     }
 
     try {
@@ -74,7 +78,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         const findOptions: FindManyOptions<Role> = {
             where: finalWhere,
             relations: {
-                createdByAdministrator: true,
+                createdByUser: true,
             },
             order,
             ...(length ? { skip: start, take: length } : {})
@@ -104,17 +108,22 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     }
 };
 
-export const POST: RequestHandler = async ({ request, cookies }): Promise<Response> => {
-    const { user, response: authResponse } = await getCurrentUserAuthorization(cookies, Permission.CREATE_ROLES);
-    if(authResponse) {
-        return authResponse as Response;
+export const POST: RequestHandler = async ({ request, cookies, locals }): Promise<Response> => {
+    const user = await User.findOne({
+        where: { id: locals.user?.id },
+        relations: { role: true }
+    });
+    if(!user) {
+        throw error(401, 'Unauthorized');
     }
-    const administrator = user as Administrator;
+    if(!user.can(Permission.READ_ROLES)) {
+        throw error(403, 'Forbidden');
+    }
 
     const requestData = await request.json();
     const role = new Role();
     Object.assign(role, requestData);
-    role.createdByAdministratorId = administrator.id;
+    role.createdByUserId = user.id;
     const success = await role.save();
 
     if(!success) {

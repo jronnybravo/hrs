@@ -1,10 +1,10 @@
-import { json, type RequestHandler } from '@sveltejs/kit';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { instanceToPlain } from 'class-transformer';
 
-import { Role } from '$lib/entities/Role';
-import { AdministratorPermission as Permission } from '$lib/entities/utils/Permission';
+import { Role } from '$lib/db/entities/Role';
+import { Permission } from '$lib/utils/Permission';
 
-import { getCurrentUserAuthorization } from '$lib/utils/Auth';
+import { User } from '$lib/db/entities/User';
 
 const getRoleResponseById = async (id: string) => {
     const roleId = parseInt(id);
@@ -35,10 +35,16 @@ const getRoleResponseById = async (id: string) => {
     };
 };
 
-export const PUT: RequestHandler = async ({ params, request, cookies }): Promise<Response> => {
-    const { response: authResponse } = await getCurrentUserAuthorization(cookies, Permission.UPDATE_ROLES);
-    if(authResponse) {
-        return authResponse as Response;
+export const PUT: RequestHandler = async ({ params, request, locals }): Promise<Response> => {
+    const user = await User.findOne({
+        where: { id: locals.user?.id },
+        relations: { role: true }
+    });
+    if(!user) {
+        throw error(401, 'Unauthorized');
+    }
+    if(!user.can(Permission.UPDATE_ROLES)) {
+        throw error(403, 'Forbidden');
     }
 
     const { role, response: roleResponse } = await getRoleResponseById(params.id!);
@@ -64,10 +70,16 @@ export const PUT: RequestHandler = async ({ params, request, cookies }): Promise
     );
 }
 
-export const DELETE: RequestHandler = async ({ params, cookies }): Promise<Response> => {
-    const { response: authResponse } = await getCurrentUserAuthorization(cookies, Permission.DELETE_ROLES);
-    if(authResponse) {
-        return authResponse as Response;
+export const DELETE: RequestHandler = async ({ params, locals }): Promise<Response> => {
+    const user = await User.findOne({
+        where: { id: locals.user?.id },
+        relations: { role: true }
+    });
+    if(!user) {
+        throw error(401, 'Unauthorized');
+    }
+    if(!user.can(Permission.DELETE_ROLES)) {
+        throw error(403, 'Forbidden');
     }
 
     const { role, response: roleResponse } = await getRoleResponseById(params.id!);

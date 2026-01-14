@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { AdministratorPermission } from '$lib/entities/utils/Permission';
+    import { Permission } from '$lib/utils/Permission';
 
     interface Props {
         selectedPermissions?: string[] | null;
@@ -26,7 +26,7 @@
 
     // Build tree and initialize expanded state in one pass
     const { tree: permissionTree, expanded: initialExpanded, nodeMap } = (() => {
-        const hierarchy = AdministratorPermission.getHierarchy();
+        const hierarchy = Permission.getHierarchy();
         const expandedState: Record<string, boolean> = {};
         const map = new Map<string, PermissionNode>();
         

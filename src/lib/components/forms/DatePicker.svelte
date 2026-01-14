@@ -1,6 +1,5 @@
 <script lang="ts">
     import { browser } from '$app/environment';
-	import moment from 'moment';
     
     export let value: Date | { from: Date | null; to: Date | null } | string | null = null;
     export let range: boolean = false;
@@ -42,6 +41,33 @@
     let endMinute = 0;
     let endAmPm = 'PM';
 
+    // Helper function to format date
+    function formatDate(date: Date | undefined): string {
+        if (!date) {
+            return '';
+        }
+
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const monthNames = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+        
+        if(!timeMode) {
+            return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}, ${year}`;
+        }
+        
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        
+        if(use24Hour) {
+            return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}, ${year} ${hours}:${minutes}`;
+        }
+        
+        const hour12 = date.getUTCHours() % 12 || 12;
+        const ampm = date.getUTCHours() >= 12 ? 'PM' : 'AM';
+        return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}, ${year} ${hour12}:${minutes} ${ampm}`;
+    }
+
     // Update selected dates when value changes externally
     $: if (range && value && typeof value === 'object' && 'from' in value) {
         selectedStart = value.from;
@@ -56,24 +82,7 @@
         selectedEnd = null;
     }
     $: if (typeof value === 'string') {
-        value = moment.utc(value).toDate();
-    }
-
-    // Format date for display
-    function formatDate(date: Date | undefined): string {
-        if (!date) {
-            return '';
-        }
-
-        // Use UTC to display dates consistently without timezone conversion
-        const dateTime = moment.utc(date);
-        if(!timeMode) {
-            return dateTime.format('MMM. D, YYYY');
-        }
-        if(use24Hour) {
-            return dateTime.format('MMM. D, YYYY HH:mm');
-        }
-        return dateTime.format('MMM. D, YYYY h:mm A');
+        value = new Date(value);
     }
 
     // Get display text - Fix the complex logic

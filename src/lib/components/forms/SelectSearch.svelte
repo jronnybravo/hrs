@@ -42,8 +42,8 @@
 	let searchQuery = $state('');
 	let options = $state<Option[]>([]);
 	let loading = $state(false);
-	let containerRef: HTMLDivElement;
-	let inputRef: HTMLInputElement;
+	let containerRef = $state<HTMLDivElement | undefined>(undefined);
+	let inputRef = $state<HTMLInputElement | undefined>(undefined);
 	let debounceTimer: number;
 
 	// Selected option label for display
@@ -225,7 +225,7 @@
 <div
 	bind:this={containerRef}
 	class="relative w-full {className}"
-	use:clickOutside={closeDropdown}
+	use:clickOutside={() => closeDropdown()}
 >
 	<!-- Hidden slot for option children -->
 	<div class="hidden">
@@ -247,10 +247,13 @@
 		<!-- Icons -->
 		<span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
 			{#if clearable && value && !disabled}
-				<button
-					type="button"
+				<div
+					role="button"
+					tabindex="0"
+					aria-label="Clear selection"
 					onclick={clearSelection}
-					class="pointer-events-auto rounded p-1 hover:bg-gray-200"
+					onkeydown={(e) => e.key === 'Enter' && clearSelection(e)}
+					class="pointer-events-auto rounded p-1 hover:bg-gray-200 cursor-pointer"
 				>
 					<svg
 						class="h-4 w-4 text-gray-400"
@@ -265,7 +268,7 @@
 							d="M6 18L18 6M6 6l12 12"
 						/>
 					</svg>
-				</button>
+				</div>
 			{:else}
 				<svg
 					class="h-5 w-5 text-gray-400 transition-transform"
@@ -289,6 +292,8 @@
 	{#if isOpen}
 		<div
 			class="absolute z-10 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-lg"
+			role="listbox"
+			tabindex="0"
 			onkeydown={handleKeydown}
 		>
 			<!-- Search input -->

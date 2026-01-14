@@ -82,7 +82,7 @@
     }
 </script>
 
-<div class="relative w-full" use:clickOutside={handleClickOutside}>
+<div class="relative w-full" use:clickOutside={() => handleClickOutside()}>
     <div class="relative">
         <input
             bind:this={inputElement}

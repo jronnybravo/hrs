@@ -63,13 +63,6 @@
         lg: 'w-6 h-6',
         xl: 'w-7 h-7'
     };
-
-    // Remove baseClasses computation - we'll use direct class binding
-
-    // If href is provided, render as anchor tag
-    if (href) {
-        // This will be handled in the template
-    }
 </script>
 
 {#if href}

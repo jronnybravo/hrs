@@ -12,7 +12,7 @@
 
 
     import { toUriParams } from "$lib/utils/URI.js";
-    import { toastStore } from "$lib/stores/Toast";
+    import { toastStore } from "$lib/stores/toast";
 
     import type { Role } from "$lib/db/entities/Role";
 
@@ -22,8 +22,8 @@
         canUpdateRoles: boolean;
         canDeleteRoles: boolean;
     });
-    const showFirstColumn = capabilities.canUpdateRoles || capabilities.canDeleteRoles;
-    const columnCount = 4 - +!showFirstColumn;
+    const showFirstColumn = $derived(capabilities.canUpdateRoles || capabilities.canDeleteRoles);
+    const columnCount = $derived(4 - +!showFirstColumn);
 
     let isLoading = $state(false);
     let error = $state("");
@@ -163,14 +163,14 @@
     <title>Visit Siquijor Admin - Roles</title>
 </svelte:head>
 
-<div class="container mx-auto p-2">
-    <div class="flex justify-between items-center mb-6">
+<div class="container-fluid p-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <Breadcrumb items={[
             { iconClass: "bi-house-door-fill", label: "Dashboard", href: "/dashboard" },
             { iconClass: "bi-person-fill", label: breadcrumbLabel }
         ]} />
 
-        <div class="flex items-center gap-2">
+        <div class="d-flex align-items-center gap-2">
             {#if capabilities.canDeleteRoles && selectedRoles.size > 0}
                 <Button onclick={() => rolesToDelete = new Set(selectedRoles)}
                     variant="danger">
@@ -198,13 +198,13 @@
 
     <div class="siq-card-table">
         <div class="siq-table-container">
-            <table class="siq-table w-full min-w-[800px]">
+            <table class="siq-table table table-hover w-100">
                 <thead>
                     <tr>
                         {#if showFirstColumn}
                             <th class="w-16">
                                 {#if capabilities.canDeleteRoles}
-                                    <div class="flex items-center">
+                                    <div class="d-flex align-items-center">
                                         <Checkbox bind:checked={selectedRolesAll}
                                             onchange={() => {
                                                 selectedRoles = selectedRolesAll ? new Set(roles) : new Set();
@@ -215,11 +215,11 @@
                             </th>
                         {/if}
                         <th onclick={() => handleSort('name')}
-                            class="min-w-[250px] cursor-pointer">
+                            class="cursor-pointer">
                             Name <i class="bi {getSortIconClass('name')}"></i>
                         </th>
                         <th onclick={() => handleSort('description')}
-                            class="min-w-[250px] cursor-pointer">
+                            class="cursor-pointer">
                             Description <i class="bi {getSortIconClass('description')}"></i>
                         </th>
                         <th>
@@ -259,7 +259,7 @@
                     {#if isLoading}
                         <tr>
                             <td colspan={columnCount}>
-                                <div class="flex justify-center items-center py-12">
+                                <div class="d-flex justify-content-center align-items-center py-5">
                                     <div class="siq-spinner-border text-primary-500"></div>
                                 </div>
                             </td>
@@ -267,11 +267,11 @@
                     {:else if !roles.length}
                         <tr>
                             <td colspan={columnCount}>
-                                <div class="text-center py-12">
-                                    <div class="text-surface-500 dark:text-surface-400 mb-4">
-                                        <i class="bi bi-person text-6xl"></i>
+                                <div class="text-center py-5">
+                                    <div class="text-muted mb-3">
+                                        <i class="bi bi-person"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold text-surface-900 dark:text-surface-100 mb-2">
+                                    <h3 class="h5 fw-semibold text-dark mb-2">
                                         No roles found
                                     </h3>
                                 </div>
@@ -282,7 +282,7 @@
                             <tr>
                                 {#if showFirstColumn}
                                     <td>
-                                        <div class="flex items-center justify-center">
+                                        <div class="d-flex align-items-center justify-content-center">
                                             {#if capabilities.canDeleteRoles}
                                                 <Checkbox checked={selectedRoles.has(role)}
                                                     onchange={() => {
@@ -297,14 +297,14 @@
                                             {/if}
                                             {#if capabilities.canUpdateRoles}
                                                 <a href="/dashboard/roles/{role.id}/?edit"
-                                                    class="p-1 text-surface-500 dark:text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-md hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                                                    class="p-1 text-muted rounded"
                                                     aria-label="Edit role">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                             {/if}
                                             {#if capabilities.canDeleteRoles}
                                                 <button onclick={() => roleToDelete = role}
-                                                    class="p-1 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                    class="p-1 text-danger rounded"
                                                     aria-label="Delete Role">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -334,12 +334,12 @@
     </div>
 
     {#if recordsTotal}
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-            <div class="flex flex-col sm:flex-row items-center gap-4">
-                <div class="text-sm text-surface-600 dark:text-surface-300">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4">
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                <div class="small text-muted">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, recordsFiltered)} of {recordsFiltered} items
                 </div>
-                <div class="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <div class="d-flex align-items-center gap-2 small text-muted">
                     <span>Show:</span>
                     <div class="w-[80px]">
                         <Select bind:value={itemsPerPage}
@@ -366,7 +366,7 @@
         title="Delete Role"
         confirmText="Yes, delete it">
         {#snippet message()}
-            <p class="text-surface-600 dark:text-surface-400 mb-4">
+            <p class="text-muted mb-3">
                 Are you sure you want to delete <strong>{roleToDelete?.name}</strong>?
             </p>
         {/snippet}
@@ -378,7 +378,7 @@
         title="Delete Selected Roles"
         confirmText="Yes, delete {selectedRoles.size > 1 ? 'them' : 'it'}">
         {#snippet message()}
-            <p class="text-surface-600 dark:text-surface-400 mb-4">
+            <p class="text-muted mb-3">
                 Are you sure you want to delete {selectedRoles.size} 
                 selected {selectedRoles.size > 1 ? 'roles' : 'role'}?
             </p>

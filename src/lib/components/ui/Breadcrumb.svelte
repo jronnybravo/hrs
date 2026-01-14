@@ -55,15 +55,15 @@
         onItemClick?: (item: BreadcrumbItem, index: number) => void;
     } = $props();
 
-    // Default theme with Tailwind classes
+    // Default theme with Bootstrap classes
     const defaultTheme: BreadcrumbTheme = {
         container: "",
-        list: "flex items-center space-x-2",
-        item: "flex items-center",
-        link: "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors",
-        current: "text-gray-900 dark:text-gray-100",
-        separator: "text-gray-400 dark:text-gray-500 mr-2",
-        icon: "mr-1"
+        list: "breadcrumb",
+        item: "breadcrumb-item",
+        link: "text-decoration-none text-muted-emphasis",
+        current: "active",
+        separator: "text-muted",
+        icon: "me-1"
     };
 
     // Merge themes
@@ -154,7 +154,7 @@
                         {item.label}
                     </a>
                 {:else if item.disabled}
-                    <span class="text-gray-400 dark:text-gray-500">
+                    <span class="text-muted">
                         {#if item.iconClass}
                             <i class="{item.iconClass} {appliedTheme.icon}"></i>
                         {/if}
