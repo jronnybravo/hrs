@@ -27,7 +27,11 @@
     
     let role = $state<Role>({} as Role);
     $effect(() => {
-        role = data.role as Role;
+        role = {
+            ...(data.role as Role),
+            name: (data.role as Role)?.name || '',
+            description: (data.role as Role)?.description || ''
+        };
     });
 
     let isSaving = $state(false);
@@ -116,8 +120,8 @@
     });
 </script>
 
-<div class="container mx-auto p-2">
-    <div class="flex justify-between items-center mb-6">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <Breadcrumb items={[
             { iconClass: "bi-house-door-fill", label: "Dashboard", href: "/dashboard" },
             { iconClass: "bi-person-fill", label: "Roles", href: "/dashboard/roles" },
@@ -125,7 +129,7 @@
         ]} />
 
         {#if isView && role}
-            <div class="flex items-center gap-2">
+            <div class="d-flex gap-2">
                 {#if capabilities.canUpdateRoles}
                     <Button href="/dashboard/roles/{id}?edit" variant="primary">
                         Edit Role
@@ -144,78 +148,86 @@
         {/if}
     </div>
 
-    <Form {onsubmit} class="space-y-8">
-        <div class="bg-surface-50 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-            <h2 class="text-xl font-semibold text-surface-900 dark:text-surface-100 mb-4">Basic Information</h2>
-            <div class="grid gap-6 md:grid-cols-1">
-                <div class="siq-form-group">
-                    <label for="txt_role_name" class="siq-form-label">
-                        Role Name {#if !isView}<span class="text-error-500">*</span>{/if}
-                    </label>
-                    <Textbox bind:value={role.name}
-                        id="txt_role_name"
-                        placeholder="Role name"
-                        required={!isView}
-                        disabled={isView}
-                    />
-                </div>
+    <Form {onsubmit} class="mb-5">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title h5 mb-4">Basic Information</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="txt_role_name" class="form-label">
+                                Role Name {#if !isView}<span class="text-danger">*</span>{/if}
+                            </label>
+                            <Textbox bind:value={role.name}
+                                id="txt_role_name"
+                                placeholder="Role name"
+                                required={!isView}
+                                disabled={isView}
+                            />
+                        </div>
 
-                <div class="siq-form-group">
-                    <label for="txt_role_description" class="siq-form-label">Description</label>
-                    <Textarea bind:value={role.description}
-                        id="txt_role_description"
-                        placeholder="Describe this role..."
-                        disabled={isView} />
+                        <div class="mb-3">
+                            <label for="txt_role_description" class="form-label">Description</label>
+                            <Textarea bind:value={role.description}
+                                id="txt_role_description"
+                                placeholder="Describe this role..."
+                                disabled={isView} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-surface-50 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-            <h2 class="text-xl font-semibold text-surface-900 dark:text-surface-100 mb-4">Permissions</h2>
-            <p class="text-sm text-surface-600 dark:text-surface-400 mb-4">
-                Define the permissions for this role.
-                Administrators with this role will inherit these permissions.
-            </p>
-            {#if isView}
-                {#if role.permissions?.length}
-                    <div class="flex flex-wrap gap-2">
-                        {#each role.permissions as permission}
-                            <div class="flex items-center gap-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-3 py-1 rounded">
-                                <span class="text-sm">{permission}</span>
-                            </div>
-                        {/each}
-                    </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title h5 mb-4">Permissions</h2>
+                <p class="small text-muted mb-3">
+                    Define the permissions for this role.
+                    Administrators with this role will inherit these permissions.
+                </p>
+                {#if isView}
+                    {#if role.permissions?.length}
+                        <div class="d-flex flex-wrap gap-2">
+                            {#each role.permissions as permission}
+                                <div class="badge bg-primary">
+                                    {permission}
+                                </div>
+                            {/each}
+                        </div>
+                    {:else}
+                        <p class="small text-muted fst-italic">No permissions assigned</p>
+                    {/if}
                 {:else}
-                    <p class="text-sm text-surface-500 dark:text-surface-400 italic">No permissions assigned</p>
+                    <PermissionTreeSelector bind:selectedPermissions={role.permissions} />
                 {/if}
-            {:else}
-                <PermissionTreeSelector bind:selectedPermissions={role.permissions} />
-            {/if}
+            </div>
         </div>
 
         {#if isView && role}
-            <div class="bg-surface-50 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-                <h2 class="text-xl font-semibold text-surface-900 dark:text-surface-100 mb-4">Statistics</h2>
-                <div class="grid gap-4 md:grid-cols-2">
-                    <div>
-                        <h3 class="text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">Administrators</h3>
-                        <p class="text-2xl font-bold text-surface-900 dark:text-surface-100">
-                            {role.users?.length || 0}
-                        </p>
-                        <p class="text-sm text-surface-600 dark:text-surface-400">administrators with this role</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">Created By</h3>
-                        <p class="text-surface-900 dark:text-surface-100">
-                            {role.createdByUser?.fullName || role.createdByUser?.username || 'System'}
-                        </p>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h5 mb-4">Statistics</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h3 class="h6">Administrators</h3>
+                            <p class="display-6 fw-bold">
+                                {role.users?.length || 0}
+                            </p>
+                            <p class="small text-muted">administrators with this role</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h3 class="h6">Created By</h3>
+                            <p>
+                                {role.createdByUser?.fullName || role.createdByUser?.username || 'System'}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         {/if}
 
         {#if !isView}
-            <div class="flex justify-between items-center pt-6 border-t border-surface-200 dark:border-surface-700">
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                 <Button href={isNew ? '/dashboard/roles' : `/dashboard/roles/${id}`}
                     type="button"
                     variant="ghost">
