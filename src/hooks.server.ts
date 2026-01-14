@@ -1,6 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
-import { initializeDatabase, closeDatabase } from '$lib/db';
-import type { SessionUser } from '$lib/auth';
+import { initializeDatabase } from '$lib/db';
 
 let dbInitialized = false;
 
@@ -19,16 +18,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Get user from cookie/session
 	const sessionId = event.cookies.get('sessionId');
 	const userId = event.cookies.get('userId');
-	const userEmail = event.cookies.get('userEmail');
-	const userFirstName = event.cookies.get('userFirstName');
-	const userLastName = event.cookies.get('userLastName');
 
-	if (sessionId && userId && userEmail) {
+	if (sessionId && userId) {
 		event.locals.user = {
-			id: parseInt(userId),
-			email: userEmail,
-			firstName: userFirstName || '',
-			lastName: userLastName || ''
+			id: parseInt(userId)
 		};
 	}
 

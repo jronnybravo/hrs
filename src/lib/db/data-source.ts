@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './entities/User';
 import { Setting } from './entities/Setting';
+import { Role } from './entities/Role';
 
 // Load environment variables
 config();
@@ -18,7 +19,8 @@ export const AppDataSource = new DataSource({
 	logging: process.env.NODE_ENV !== 'production',
 	entities: [
         Setting,
-        User
+        User,
+        Role
     ],
 	migrations: ['src/lib/db/migrations/**/*.ts'],
 	subscribers: []

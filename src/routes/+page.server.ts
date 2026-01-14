@@ -1,7 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail, redirect, type Redirect } from '@sveltejs/kit';
 import { User } from '$lib/db/entities/User';
-import { verifyPassword } from '$lib/auth';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// If user is already logged in, redirect to dashboard
@@ -13,18 +12,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	login: async ({ request, cookies }) => {
 		const data = await request.formData();
-		const email = data.get('email')?.toString();
+		const emailOrUsername = data.get('email')?.toString();
 		const password = data.get('password')?.toString();
 
-		if (!email || !password) {
-			return fail(400, { error: 'Email and password are required' });
+		if (!emailOrUsername || !password) {
+			return fail(400, { error: 'Email/username and password are required' });
 		}
 
 		try {
-			const user = await User.findOneBy({ email });
+			const user = await User.findOne({
+				where: [
+					{ email: emailOrUsername },
+					{ username: emailOrUsername }
+				]
+			});
 
-			if (!user || !verifyPassword(password, user.password)) {
-				return fail(401, { error: 'Invalid email or password' });
+			if (!user || !User.verifyPassword(password, user.password)) {
+				return fail(401, { error: 'Invalid email/username or password' });
 			}
 
 			// Create session cookies
@@ -38,21 +42,8 @@ export const actions: Actions = {
 
 			cookies.set('userId', user.id.toString(), {
 				path: '/',
-				maxAge: 60 * 60 * 24 * 30
-			});
-
-			cookies.set('userEmail', user.email, {
-				path: '/',
-				maxAge: 60 * 60 * 24 * 30
-			});
-
-			cookies.set('userFirstName', user.firstName, {
-				path: '/',
-				maxAge: 60 * 60 * 24 * 30
-			});
-
-			cookies.set('userLastName', user.lastName, {
-				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 30
 			});
 

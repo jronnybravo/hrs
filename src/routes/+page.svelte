@@ -36,15 +36,12 @@
 						>
 							<div class="mb-3">
 								<label for="email" class="form-label">Email Address</label>
-								<input
-									type="email"
+								<input bind:value={email}
 									class="form-control"
 									id="email"
 									name="email"
-									bind:value={email}
 									required
-									disabled={isLoading}
-								/>
+									disabled={isLoading} />
 							</div>
 
 							<div class="mb-3">
