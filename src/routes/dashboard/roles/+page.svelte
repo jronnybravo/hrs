@@ -160,7 +160,7 @@
 </script>
 
 <svelte:head>
-    <title>Visit Siquijor Admin - Roles</title>
+    <title>Roles</title>
 </svelte:head>
 
 <div class="container-fluid p-2">
@@ -196,142 +196,138 @@
         </Alert>
     {/if}
 
-    <div class="siq-card-table">
-        <div class="siq-table-container">
-            <table class="siq-table table table-hover w-100">
-                <thead>
+    <table class="table table-hover w-100">
+        <thead>
+            <tr>
+                {#if showFirstColumn}
+                    <th class="w-16">
+                        {#if capabilities.canDeleteRoles}
+                            <div class="d-flex align-items-center">
+                                <Checkbox bind:checked={selectedRolesAll}
+                                    onchange={() => {
+                                        selectedRoles = selectedRolesAll ? new Set(roles) : new Set();
+                                    }}
+                                />
+                            </div>
+                        {/if}
+                    </th>
+                {/if}
+                <th onclick={() => handleSort('name')}
+                    class="cursor-pointer">
+                    Name <i class="bi {getSortIconClass('name')}"></i>
+                </th>
+                <th onclick={() => handleSort('description')}
+                    class="cursor-pointer">
+                    Description <i class="bi {getSortIconClass('description')}"></i>
+                </th>
+                <th>
+                    Permissions
+                </th>
+            </tr>
+            <tr>
+                {#if showFirstColumn}
+                    <td>&nbsp;</td>
+                {/if}
+                <td>
+                    <Textbox bind:value={filter.name}
+                        oninput={() => handleFilterTextbox('name')}
+                        onclear={() => {
+                            filter.name = '';
+                            handleFilterTextbox('name', 0);
+                        }}
+                        placeholder="Filter by name or username"
+                        size="sm"
+                        clearable />
+                </td>
+                <td>
+                    <Textbox bind:value={filter.description}
+                        oninput={() => handleFilterTextbox('description')}
+                        onclear={() => {
+                            filter.description = '';
+                            handleFilterTextbox('description', 0);
+                        }}
+                        placeholder="Filter by description"
+                        size="sm"
+                        clearable />
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+        </thead>
+        <tbody>
+            {#if isLoading}
+                <tr>
+                    <td colspan={columnCount}>
+                        <div class="d-flex justify-content-center align-items-center py-5">
+                            <div class="text-primary-500"></div>
+                        </div>
+                    </td>
+                </tr>
+            {:else if !roles.length}
+                <tr>
+                    <td colspan={columnCount}>
+                        <div class="text-center py-5">
+                            <div class="text-muted mb-3">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <h3 class="h5 fw-semibold text-dark mb-2">
+                                No roles found
+                            </h3>
+                        </div>
+                    </td>
+                </tr>
+            {:else}
+                {#each roles as role}
                     <tr>
                         {#if showFirstColumn}
-                            <th class="w-16">
-                                {#if capabilities.canDeleteRoles}
-                                    <div class="d-flex align-items-center">
-                                        <Checkbox bind:checked={selectedRolesAll}
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    {#if capabilities.canDeleteRoles}
+                                        <Checkbox checked={selectedRoles.has(role)}
                                             onchange={() => {
-                                                selectedRoles = selectedRolesAll ? new Set(roles) : new Set();
+                                                if(selectedRoles.has(role)) {
+                                                    selectedRoles.delete(role);
+                                                } else {
+                                                    selectedRoles.add(role);
+                                                }
+                                                selectedRoles = new Set(selectedRoles);
                                             }}
-                                        />
-                                    </div>
-                                {/if}
-                            </th>
-                        {/if}
-                        <th onclick={() => handleSort('name')}
-                            class="cursor-pointer">
-                            Name <i class="bi {getSortIconClass('name')}"></i>
-                        </th>
-                        <th onclick={() => handleSort('description')}
-                            class="cursor-pointer">
-                            Description <i class="bi {getSortIconClass('description')}"></i>
-                        </th>
-                        <th>
-                            Permissions
-                        </th>
-                    </tr>
-                    <tr>
-                        {#if showFirstColumn}
-                            <td>&nbsp;</td>
-                        {/if}
-                        <td>
-                            <Textbox bind:value={filter.name}
-                                oninput={() => handleFilterTextbox('name')}
-                                onclear={() => {
-                                    filter.name = '';
-                                    handleFilterTextbox('name', 0);
-                                }}
-                                placeholder="Filter by name or username"
-                                size="sm"
-                                clearable />
-                        </td>
-                        <td>
-                            <Textbox bind:value={filter.description}
-                                oninput={() => handleFilterTextbox('description')}
-                                onclear={() => {
-                                    filter.description = '';
-                                    handleFilterTextbox('description', 0);
-                                }}
-                                placeholder="Filter by description"
-                                size="sm"
-                                clearable />
-                        </td>
-                        <td>&nbsp;</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#if isLoading}
-                        <tr>
-                            <td colspan={columnCount}>
-                                <div class="d-flex justify-content-center align-items-center py-5">
-                                    <div class="siq-spinner-border text-primary-500"></div>
+                                            class="mr-2" />
+                                    {/if}
+                                    {#if capabilities.canUpdateRoles}
+                                        <a href="/dashboard/roles/{role.id}/?edit"
+                                            class="p-1 text-muted rounded"
+                                            aria-label="Edit role">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    {/if}
+                                    {#if capabilities.canDeleteRoles}
+                                        <button onclick={() => roleToDelete = role}
+                                            class="p-1 text-danger rounded"
+                                            aria-label="Delete Role">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    {/if}
                                 </div>
                             </td>
-                        </tr>
-                    {:else if !roles.length}
-                        <tr>
-                            <td colspan={columnCount}>
-                                <div class="text-center py-5">
-                                    <div class="text-muted mb-3">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <h3 class="h5 fw-semibold text-dark mb-2">
-                                        No roles found
-                                    </h3>
-                                </div>
-                            </td>
-                        </tr>
-                    {:else}
-                        {#each roles as role}
-                            <tr>
-                                {#if showFirstColumn}
-                                    <td>
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            {#if capabilities.canDeleteRoles}
-                                                <Checkbox checked={selectedRoles.has(role)}
-                                                    onchange={() => {
-                                                        if(selectedRoles.has(role)) {
-                                                            selectedRoles.delete(role);
-                                                        } else {
-                                                            selectedRoles.add(role);
-                                                        }
-                                                        selectedRoles = new Set(selectedRoles);
-                                                    }}
-                                                    class="mr-2" />
-                                            {/if}
-                                            {#if capabilities.canUpdateRoles}
-                                                <a href="/dashboard/roles/{role.id}/?edit"
-                                                    class="p-1 text-muted rounded"
-                                                    aria-label="Edit role">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                            {/if}
-                                            {#if capabilities.canDeleteRoles}
-                                                <button onclick={() => roleToDelete = role}
-                                                    class="p-1 text-danger rounded"
-                                                    aria-label="Delete Role">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            {/if}
-                                        </div>
-                                    </td>
-                                {/if}
-                                <td>
-                                    <a href="/dashboard/roles/{role.id}/" class="font-bold">
-                                        {role.name}
-                                    </a>
-                                </td>
-                                <td>
-                                    {role.description}
-                                </td>
-                                <td>
-                                    {#each role.permissions as permission}
-                                        <div>{permission}</div>
-                                    {/each}
-                                </td>
-                            </tr>
-                        {/each}
-                    {/if}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        {/if}
+                        <td>
+                            <a href="/dashboard/roles/{role.id}/" class="font-bold">
+                                {role.name}
+                            </a>
+                        </td>
+                        <td>
+                            {role.description}
+                        </td>
+                        <td>
+                            {#each role.permissions as permission}
+                                <div>{permission}</div>
+                            {/each}
+                        </td>
+                    </tr>
+                {/each}
+            {/if}
+        </tbody>
+    </table>
 
     {#if recordsTotal}
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4">
